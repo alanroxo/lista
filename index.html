@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo de localStorage com Imagens</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilo do corpo da página */
+        body {
+            background-color: #e0ffff; /* Tom de ciano mais claro */
+            padding: 20px; /* Espaçamento interno */
+        }
+        /* Estilo dos títulos */
+        h1, h2 {
+            color: #000000; /* Cor do texto em preto */
+        }
+        /* Estilo do grupo de input */
+        .product-input {
+            margin-bottom: 10px; /* Margem inferior */
+        }
+        /* Estilo das imagens dos produtos */
+        .product-item img {
+            width: 50px; /* Largura fixa */
+            height: auto; /* Altura automática para manter a proporção */
+            margin-right: 10px; /* Margem à direita */
+        }
+        /* Estilo do botão de adicionar */
+        #addButton {
+            background-color: #008b8b; /* Tom de ciano escuro */
+            border-color: #006868; /* Bordas em um tom mais escuro */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Lista de Memes</h1>
+        <div class="input-group product-input">
+            <input type="text" id="productInput" class="form-control" placeholder="Adicionar Meme"> <!-- Input para o nome do meme -->
+            <input type="text" id="imageInput" class="form-control" placeholder="URL da imagem"> <!-- Input para a URL da imagem -->
+            <div class="input-group-append">
+                <button id="addButton" class="btn btn-primary">Adicionar</button> <!-- Botão para adicionar o meme -->
+            </div>
+        </div>
+        
+        <h2>Memes:</h2>
+        <ul id="productList" class="list-group"></ul> <!-- Lista onde os memes serão exibidos -->
+        
+        <button id="removeAllButton" class="btn btn-danger mt-3">Remover Todos</button> <!-- Botão para remover todos os memes -->
+    </div>
+
+    <script>
+        // Função para carregar os produtos armazenados no localStorage
+        function loadProducts() {
+            // Recupera os produtos do localStorage ou inicializa como um array vazio
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            
+            // Adiciona produtos padrão se o localStorage estiver vazio
+            if (products.length === 0) {
+                const defaultProducts = [
+                    { name: 'quadrebe', image: 'imagens/calebe.jpg' },
+                    { name: 'kamilioi', image: 'imagens/kamiloi.jpg' },
+                    { name: 'm9delas', image: 'imagens/m9delas.jpg' },
+                    { name: 'alanS2', image: 'imagens/alanhomemdascavernas.jpg'},
+                    { name: 'irmandade', image: 'imagens/duaslesbicas.jpg'},
+                ];
+                localStorage.setItem('products', JSON.stringify(defaultProducts)); // Salva produtos padrão no localStorage
+                products.push(...defaultProducts); // Adiciona os produtos padrão ao array de produtos
+            }
+
+            const productList = document.getElementById('productList');
+            productList.innerHTML = ''; // Limpa a lista atual
+
+            // Itera sobre os produtos e os adiciona à lista
+            products.forEach((product, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item d-flex align-items-center product-item'; // Classe para estilo
+
+                const img = document.createElement('img'); // Cria um elemento de imagem
+                img.src = product.image; // Define a URL da imagem
+                img.alt = product.name; // Define o texto alternativo
+
+                const name = document.createElement('span'); // Cria um elemento de texto
+                name.textContent = product.name; // Define o nome do meme
+
+                const removeButton = document.createElement('button'); // Cria um botão de remover
+                removeButton.textContent = 'Remover'; // Texto do botão
+                removeButton.className = 'btn btn-danger btn-sm ml-auto'; // Classes para estilo
+                removeButton.onclick = () => removeProduct(index); // Define a ação de remover
+
+                // Adiciona os elementos ao item da lista
+                listItem.appendChild(img);
+                listItem.appendChild(name);
+                listItem.appendChild(removeButton);
+                productList.appendChild(listItem); // Adiciona o item à lista
+            });
+        }
+
+        // Função para adicionar um novo produto
+        function addProduct() {
+            const productInput = document.getElementById('productInput');
+            const imageInput = document.getElementById('imageInput');
+            const productName = productInput.value.trim(); // Nome do meme
+            const imageUrl = imageInput.value.trim(); // URL da imagem
+
+            // Verifica se os campos estão preenchidos
+            if (productName && imageUrl) {
+                const products = JSON.parse(localStorage.getItem('products')) || []; // Recupera produtos existentes
+                products.push({ name: productName, image: imageUrl }); // Adiciona novo produto
+                localStorage.setItem('products', JSON.stringify(products)); // Salva no localStorage
+                productInput.value = ''; // Limpa o campo de nome
+                imageInput.value = ''; // Limpa o campo de URL
+                loadProducts(); // Atualiza a lista
+            } else {
+                alert("Por favor, insira um nome de meme e uma URL de imagem."); // Alerta se os campos estiverem vazios
+            }
+        }
+
+        // Função para remover um produto da lista
+        function removeProduct(index) {
+            const products = JSON.parse(localStorage.getItem('products')) || []; // Recupera produtos
+            products.splice(index, 1); // Remove o produto pelo índice
+            localStorage.setItem('products', JSON.stringify(products)); // Atualiza o localStorage
+            loadProducts(); // Atualiza a lista
+        }
+
+        // Função para remover todos os produtos da lista
+        function removeAllProducts() {
+            localStorage.removeItem('products'); // Remove todos os produtos do localStorage
+            loadProducts(); // Atualiza a lista
+        }
+
+        // Adiciona eventos aos botões
+        document.getElementById('addButton').addEventListener('click', addProduct);
+        document.getElementById('removeAllButton').addEventListener('click', removeAllProducts);
+
+        loadProducts(); // Carrega os produtos ao iniciar
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
